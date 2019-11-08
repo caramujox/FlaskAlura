@@ -12,5 +12,11 @@ class Jogo(db.Model):
         self.categoria = categoria
         self.console = console
 
-def toDict(self):
-    return {'nome': self.nome, 'categoria': self.categoria, 'console': self.console}
+    def toDict(self):
+        return {'nome': self.nome, 'categoria': self.categoria, 'console': self.console}
+    
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+    
+

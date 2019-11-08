@@ -1,0 +1,24 @@
+{% extends "template.html" %}
+{% block conteudo %}
+<form action="{{url_for('criar_usuario')}}" method="POST">
+  <fieldset>
+    <div class="form-group">
+      <label for="nome">Nome</label>
+      <input type="text" id="nome" name="nome" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="categoria">E-mail</label>
+      <input type="text" id="email" name="email" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="console">Username</label>
+      <input type="text" id="username" name="username" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="console">Senha</label>
+      <input type="password" id="senha" name="senha" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary btn-salvar">Salvar</button>
+  </fieldset>
+</form>
+{% endblock %}
