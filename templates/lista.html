@@ -6,6 +6,8 @@
             <th>Nome</th>
             <th>Categoria</th>
             <th>console</th>
+            <th>Editar</th>
+            <th>Deletar</th>
         </tr>
     </thead>
     <tbody>
@@ -14,6 +16,8 @@
             <td>{{jogo.nome}}</td>
             <td>{{jogo.categoria}}</td>
             <td>{{jogo.console}}</td>
+            <td><a href="{{ url_for('editar', id=jogo.id)}}">Editar</a></td>
+            <td><a href="{{ url_for('deletar', id_jogo=jogo.id)}}">Deletar</a></td>
         </tr>
         {% endfor %}
     </tbody>

@@ -19,4 +19,6 @@ class Jogo(db.Model):
         db.session.add(self)
         db.session.commit()
     
-
+    @classmethod
+    def select_id(cls, id_entrada):
+        return cls.query.filter.filter_by(id=id_entrada).first()

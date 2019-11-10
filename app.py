@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from flask_restful import Resource, Api
 from db import db
+import os
 
 app = Flask(__name__)
 app.secret_key = 'caiao'
@@ -10,6 +11,7 @@ app.config['SQLALCHEMY_BINDS'] = {
     'user': 'sqlite:///user.db'
 }
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_PATH'] = os.path.dirname(os.path.abspath(__file__)) + '/uploads'
 # @app.route("/")
 # def hello():
 #     return "HelloWorld!"
@@ -27,10 +29,12 @@ class Jogo(db.Model):
     categoria = db.Column(db.String(200), nullable = False)
     console = db.Column(db.String(200), nullable = False)
 
+
     def __init__(self, nome, categoria, console):
         self.nome = nome
         self.categoria = categoria
         self.console = console
+
 
 class Usuario(db.Model):
     __bind_key__ = 'user'
@@ -46,11 +50,13 @@ class Usuario(db.Model):
         self.email = email
         self.senha = senha
 
+
+#inserir usuarios na mao
 usuario1 = Usuario('luan', 'Luan Marques', '1234', 'luan')
 usuario2 = Usuario('2', 'Caio', '3540', 'caiao')
 usuario3 = Usuario('3', 'Carol', '9876', 'carol')
 
-
+#inserir jogos na mao
 jogo1 = Jogo('Super Mario', 'Acao', 'SNES')
 jogo2 = Jogo('Pokemon Gold', 'RPG', 'GBA')
      
@@ -69,12 +75,18 @@ def cadastro():
 
 @app.route('/criar_jogo', methods = ['POST',])
 def criar_jogo():
+    uploadPath=app.config['UPLOAD_PATH']
     nome = request.form['nome']
     categoria = request.form['categoria']
     console = request.form['console']
-    jogo = Jogo(nome, categoria, console)
-    Jogo.session.add(jogo)
-    Jogo.session.commit()
+    jogo = Jogo(nome, categoria, console)    
+    db.session.add(jogo)
+    db.session.commit()
+
+    arquivo = request.files['arquivo']
+    arquivo.save(f'{uploadPath}/capa{jogo.id}.jpg')
+
+
     #lista.append(jogo)
     return redirect(url_for('index'))
 
@@ -122,6 +134,37 @@ def autenticar():
         flash('Usuário não cadastrado, favor realizar o cadastro!')
         return redirect(url_for('login'))
 
+@app.route('/editar/<int:id>')
+def editar(id):
+    if 'usuario_logado' not in session or session['usuario_logado'] == None:
+        return redirect(url_for('login', proxima = url_for('editar')))
+    jogo = Jogo.query.filter_by(id=id).first()
+    return render_template('editar.html', titulo = 'Edite seu Jogo', jogo = jogo, capa_jogo = f'capa{id}.jpg')
+
+@app.route('/atualizar', methods = ['POST',])
+def atualizar():    
+
+    idform = request.form['id']
+    jogo = Jogo.query.filter_by(id = idform).first()
+    jogo.nome = request.form['nome']
+    jogo.categoria = request.form['categoria']
+    jogo.console = request.form['console']    
+    db.session.commit()
+
+    #lista.append(jogo)
+    return redirect(url_for('index'))
+
+@app.route('/deletar/<int:id_jogo>')
+def deletar(id_jogo):
+    jogo = Jogo.query.filter_by(id=id_jogo).first()
+    db.session.delete(jogo)
+    db.session.commit()
+
+    return redirect(url_for('index'))
+
+@app.route('/uploads/<nome_arquivo>')
+def imagem(nome_arquivo):
+    return send_from_directory('uploads', nome_arquivo)
 
 
 @app.route('/logout')
